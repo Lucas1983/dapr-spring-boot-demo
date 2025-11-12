@@ -1,0 +1,62 @@
+// Root aggregator build for multi-module build via composite builds
+// Usage examples (from repo root):
+//   - Build all:      gradle buildAll
+//   - Clean all:      gradle cleanAll
+//   - Test all:       gradle testAll
+// If you prefer using a wrapper, you can invoke any module's wrapper from the root, e.g.:
+//   ./order-service/gradlew -b build.gradle buildAll
+
+// Define convenient aggregate tasks that call tasks in included builds (defined in settings.gradle)
+tasks.register('buildAll') {
+    group = 'build'
+    description = 'Builds all modules in the repository.'
+    dependsOn gradle.includedBuild('common-data').task(':build')
+    dependsOn gradle.includedBuild('order-service').task(':build')
+    dependsOn gradle.includedBuild('inventory-service').task(':build')
+    dependsOn gradle.includedBuild('shipping-service').task(':build')
+    dependsOn gradle.includedBuild('customer-service').task(':build')
+}
+
+// Convenience alias so `gradle build` works from root
+tasks.register('build') {
+    group = 'build'
+    description = 'Alias for buildAll.'
+    dependsOn 'buildAll'
+}
+
+tasks.register('cleanAll') {
+    group = 'build'
+    description = 'Cleans all modules in the repository.'
+    dependsOn gradle.includedBuild('common-data').task(':clean')
+    dependsOn gradle.includedBuild('order-service').task(':clean')
+    dependsOn gradle.includedBuild('inventory-service').task(':clean')
+    dependsOn gradle.includedBuild('shipping-service').task(':clean')
+    dependsOn gradle.includedBuild('customer-service').task(':clean')
+}
+
+// Convenience alias so `gradle clean` works from root
+tasks.register('clean') {
+    group = 'build'
+    description = 'Alias for cleanAll.'
+    dependsOn 'cleanAll'
+}
+
+tasks.register('testAll') {
+    group = 'verification'
+    description = 'Runs tests for all modules in the repository.'
+    dependsOn gradle.includedBuild('common-data').task(':test')
+    dependsOn gradle.includedBuild('order-service').task(':test')
+    dependsOn gradle.includedBuild('inventory-service').task(':test')
+    dependsOn gradle.includedBuild('shipping-service').task(':test')
+    dependsOn gradle.includedBuild('customer-service').task(':test')
+}
+
+// Convenience alias so `gradle test` works from root
+tasks.register('test') {
+    group = 'verification'
+    description = 'Alias for testAll.'
+    dependsOn 'testAll'
+}
+
+// Make `buildAll` the default when running `gradle` with no task
+defaultTasks 'buildAll'
