@@ -1,0 +1,43 @@
+version: 1
+common:
+  resourcesPath: ./components
+apps:
+  - appId: inventory-service
+    appDirPath: ./inventory-service
+    appProtocol: http
+    appPort: 8081
+    daprHTTPPort: 38081
+    logLevel: debug
+    appLogDestination: console
+    daprdLogDestination: console
+    command: ["./gradlew", "bootRun"]
+
+  - appId: order-service
+    appDirPath: ./order-service
+    appProtocol: http
+    appPort: 8082
+    daprHTTPPort: 38082
+    logLevel: debug
+    appLogDestination: console
+    daprdLogDestination: console
+    command: ["./gradlew", "bootRun"]
+
+  - appId: shipping-service
+    appDirPath: ./shipping-service
+    appProtocol: http
+    appPort: 8083
+    daprHTTPPort: 38083
+    logLevel: debug
+    appLogDestination: console
+    daprdLogDestination: console
+    command: ["./gradlew", "bootRun"]
+
+  - appId: customer-service
+    appDirPath: ./customer-service
+    appProtocol: http
+    appPort: 8084
+    daprHTTPPort: 38084
+    logLevel: debug
+    appLogDestination: console
+    daprdLogDestination: console
+    command: [ "./gradlew", "bootRun" ]
