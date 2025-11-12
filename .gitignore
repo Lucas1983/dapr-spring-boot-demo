@@ -1,0 +1,39 @@
+
+# Eclipse
+.project
+.classpath
+.settings/
+.gradle
+bin/
+
+build
+
+# IntelliJ
+.idea
+*.ipr
+*.iml
+*.iws
+
+# NetBeans
+nb-configuration.xml
+
+# Visual Studio Code
+.vscode
+.factorypath
+
+# OSX
+.DS_Store
+
+# Vim
+*.swp
+*.swo
+
+# patch
+*.orig
+*.rej
+
+# Local environment
+.env
+
+# TLS Certificates
+.certs/
