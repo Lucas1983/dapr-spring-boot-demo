@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  inventory-service:
+    build:
+      context: .
+      dockerfile: inventory-service/Dockerfile
+    image: inventory-service:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - JAVA_OPTS=
+    restart: unless-stopped
+
+  shipping-service:
+    build:
+      context: .
+      dockerfile: shipping-service/Dockerfile
+    image: shipping-service:latest
+    ports:
+      - "8083:8083"
+    environment:
+      - JAVA_OPTS=
+    restart: unless-stopped
+
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    image: customer-service:latest
+    ports:
+      - "8084:8084"
+    environment:
+      - JAVA_OPTS=
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    image: order-service:latest
+    ports:
+      - "8082:8082"
+    environment:
+      - JAVA_OPTS=
+    restart: unless-stopped
+
+networks:
+  default:
+    name: dapr-spring-boot-demo

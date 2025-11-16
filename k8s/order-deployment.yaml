@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        dapr.io/app-id: order-service
+        dapr.io/app-port: "8082"
+        dapr.io/enabled: "true"
+        dapr.io/metrics-port: "60644"
+        dapr.io/unix-domain-socket-path: ""
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - env:
+            - name: APP_PORT
+              value: "8082"
+            - name: DAPR_METRICS_PORT
+              value: "60644"
+            - name: APP_ID
+              value: order-service
+            - name: APP_CHANNEL_ADDRESS
+          imagePullPolicy: IfNotPresent
+          image: order-service:latest
+          name: order-service
+          ports:
+            - containerPort: 8082
+          resources: {}
+#          livenessProbe:
+#            httpGet:
+#              path: /v1.0/healthz
+#              port: 3500
+#            initialDelaySeconds: 10
+#            periodSeconds: 5

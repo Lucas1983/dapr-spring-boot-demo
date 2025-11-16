@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-service
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        dapr.io/app-id: inventory-service
+        dapr.io/app-port: "8081"
+        dapr.io/enabled: "true"
+        dapr.io/metrics-port: "60644"
+        dapr.io/unix-domain-socket-path: ""
+      labels:
+        app: inventory-service
+    spec:
+      containers:
+        - env:
+            - name: APP_PORT
+              value: "8081"
+            - name: DAPR_METRICS_PORT
+              value: "60644"
+            - name: APP_ID
+              value: inventory-service
+            - name: APP_CHANNEL_ADDRESS
+          imagePullPolicy: IfNotPresent
+          image: inventory-service:latest
+          name: inventory-service
+          ports:
+            - containerPort: 8081
+          resources: {}
+#          livenessProbe:
+#            httpGet:
+#              path: /v1.0/healthz
+#              port: 3500
+#            initialDelaySeconds: 10
+#            periodSeconds: 5
