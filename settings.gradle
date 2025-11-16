@@ -1,0 +1,9 @@
+// Root settings for composite build to aggregate independent modules
+rootProject.name = 'dapr-spring-boot-demo'
+
+// Include the independent Gradle builds as composite builds
+includeBuild('common-data')
+includeBuild('order-service')
+includeBuild('inventory-service')
+includeBuild('shipping-service')
+includeBuild('customer-service')
