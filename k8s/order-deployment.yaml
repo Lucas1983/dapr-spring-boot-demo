@@ -12,9 +12,10 @@ spec:
   template:
     metadata:
       annotations:
+        dapr.io/enabled: "true"
         dapr.io/app-id: order-service
         dapr.io/app-port: "8082"
-        dapr.io/enabled: "true"
+        dapr.io/config: "appconfig"
         dapr.io/metrics-port: "60644"
         dapr.io/unix-domain-socket-path: ""
       labels:
