@@ -1,8 +1,10 @@
 package com.dapr.shipping.business.service;
 
 import com.dapr.shipping.business.repository.ShippingRepository;
+import com.dapr.shipping.business.workflow.ShippingWorkflow;
 import com.dapr.shipping.model.dictionary.ShipmentStatus;
 import com.dapr.shipping.model.entity.Shipment;
+import io.dapr.workflows.client.DaprWorkflowClient;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ShippingService {
   private final ShippingRepository shippingRepository;
+  private final DaprWorkflowClient dapr;
 
   public Flux<Shipment> getShipments() {
     return shippingRepository.getShipments();
@@ -35,7 +38,11 @@ public class ShippingService {
 
     return shippingRepository
         .saveShipment(shipment)
-        .doOnSuccess(unused -> log.info("✅ Created shipment : {}", shipment))
+        .doOnSuccess(
+            unused -> {
+              dapr.scheduleNewWorkflow(ShippingWorkflow.class, shipment);
+              log.info("✅ Created shipment : {}", shipment);
+            })
         .doOnError(
             error ->
                 log.error(
