@@ -1,5 +1,6 @@
 package com.dapr.shipping.business.service;
 
+import static com.dapr.shipping.business.workflow.activity.ShipmentEvent.*;
 import static com.dapr.shipping.model.dictionary.ShipmentStatus.*;
 
 import com.dapr.shipping.business.repository.ShippingRepository;
@@ -40,28 +41,39 @@ public class ShippingService {
 
     return shippingRepository
         .saveShipment(shipment)
-        .doOnSuccess(unused -> log.info("✅ Created shipment : {}", shipment))
+        .thenReturn(shipment)
+        .doOnSuccess(s -> log.info("✅ Created shipment : {}", s))
         .doOnError(
             error ->
                 log.error(
                     "🛑 Error creating shipment for orderId {}: {}", orderId, error.getMessage()))
-        .map(unused -> daprWfClient.scheduleNewWorkflow(ShippingWorkflow.class, shipment))
+        .map(
+            s ->
+                daprWfClient.scheduleNewWorkflow(
+                    ShippingWorkflow.class, s, s.getShipmentId().toString()))
         .doOnSuccess(
-            workflowId -> log.info("✅ Scheduled shipping workflow with id: {}", workflowId))
+            workflowId -> log.info("🚚 Scheduled shipping workflow with id: {}", workflowId))
         .doOnError(
             throwable ->
                 log.error("🛑 Error scheduling shipping workflow: {}", throwable.getMessage()))
         .then();
   }
 
-  public Mono<Void> updateShipmentStatus(UUID workflowId, ShipmentStatus status) {
+  public Mono<Void> prepareShipment(UUID workflowId) {
 
-    switch (status) {
-      case PENDING -> daprWfClient.raiseEvent(workflowId.toString(), PENDING.name(), null);
-      case SHIPPED -> daprWfClient.raiseEvent(workflowId.toString(), SHIPPED.name(), null);
-      case DELIVERED -> daprWfClient.raiseEvent(workflowId.toString(), DELIVERED.name(), null);
-      default -> Mono.error(new IllegalArgumentException("Unsupported shipment status: " + status));
-    }
+    daprWfClient.raiseEvent(workflowId.toString(), PROCESS.name(), null);
+    return Mono.empty();
+  }
+
+  public Mono<Void> shipShipment(UUID workflowId) {
+
+    daprWfClient.raiseEvent(workflowId.toString(), SHIP.name(), null);
+    return Mono.empty();
+  }
+
+  public Mono<Void> deliverShipment(UUID workflowId) {
+
+    daprWfClient.raiseEvent(workflowId.toString(), DELIVER.name(), null);
     return Mono.empty();
   }
 

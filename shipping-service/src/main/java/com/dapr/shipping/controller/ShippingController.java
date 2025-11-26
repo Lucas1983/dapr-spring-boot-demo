@@ -2,7 +2,6 @@ package com.dapr.shipping.controller;
 
 import com.dapr.common.inventory.dto.CreateShipmentDto;
 import com.dapr.shipping.business.service.ShippingService;
-import com.dapr.shipping.model.dictionary.ShipmentStatus;
 import com.dapr.shipping.model.entity.Shipment;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +30,19 @@ public class ShippingController {
     return shippingService.createShipment(dto.getOrderId());
   }
 
-  @PutMapping("/{id}/status")
-  public Mono<Void> updateShipmentStatus(
-      @PathVariable UUID id, @RequestParam("status") ShipmentStatus status) {
-    return shippingService.updateShipmentStatus(id, status);
+  @PutMapping("/{workflowId}/prepare")
+  public Mono<Void> prepareShipment(@PathVariable UUID workflowId) {
+    return shippingService.prepareShipment(workflowId);
+  }
+
+  @PutMapping("/{workflowId}/ship")
+  public Mono<Void> shipShipment(@PathVariable UUID workflowId) {
+    return shippingService.shipShipment(workflowId);
+  }
+
+  @PutMapping("/{workflowId}/deliver")
+  public Mono<Void> deliverShipment(@PathVariable UUID workflowId) {
+    return shippingService.deliverShipment(workflowId);
   }
 
   @DeleteMapping("/shipments/{id}")
