@@ -23,6 +23,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5084"
             - name: APP_PORT
               value: "8084"
             - name: DAPR_METRICS_PORT
@@ -34,7 +36,12 @@ spec:
           image: customer-service:latest
           name: customer-service
           ports:
-            - containerPort: 8084
+            - name: app-port
+              protocol: TCP
+              containerPort: 8084
+            - name: debug-port
+              protocol: TCP
+              containerPort: 5084
           resources: {}
 #          livenessProbe:
 #            httpGet:

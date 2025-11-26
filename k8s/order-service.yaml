@@ -6,8 +6,14 @@ spec:
   selector:
     app: order-service
   ports:
-    - port: 8082
+    - name: app-port
+      port: 8082
       targetPort: 8082
       protocol: TCP
       nodePort: 30082
+    - name: debug-port
+      port: 5082
+      targetPort: 5082
+      protocol: TCP
+      nodePort: 30582
   type: NodePort
