@@ -14,6 +14,8 @@ spec:
         key: redis-password
     - name: actorStateStore
       value: "true"
+    - name: workflowStateStore
+      value: "true"
 scopes:
   - order-service
   - inventory-service
