@@ -1,5 +1,7 @@
 package com.dapr.shipping.business.service;
 
+import static com.dapr.shipping.model.dictionary.ShipmentStatus.*;
+
 import com.dapr.shipping.business.repository.ShippingRepository;
 import com.dapr.shipping.business.workflow.ShippingWorkflow;
 import com.dapr.shipping.model.dictionary.ShipmentStatus;
@@ -17,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ShippingService {
   private final ShippingRepository shippingRepository;
-  private final DaprWorkflowClient dapr;
+  private final DaprWorkflowClient daprWfClient;
 
   public Flux<Shipment> getShipments() {
     return shippingRepository.getShipments();
@@ -38,31 +40,29 @@ public class ShippingService {
 
     return shippingRepository
         .saveShipment(shipment)
-        .doOnSuccess(
-            unused -> {
-              dapr.scheduleNewWorkflow(ShippingWorkflow.class, shipment);
-              log.info("✅ Created shipment : {}", shipment);
-            })
+        .doOnSuccess(unused -> log.info("✅ Created shipment : {}", shipment))
         .doOnError(
             error ->
                 log.error(
-                    "🛑 Error creating shipment for orderId {}: {}", orderId, error.getMessage()));
+                    "🛑 Error creating shipment for orderId {}: {}", orderId, error.getMessage()))
+        .map(unused -> daprWfClient.scheduleNewWorkflow(ShippingWorkflow.class, shipment))
+        .doOnSuccess(
+            workflowId -> log.info("✅ Scheduled shipping workflow with id: {}", workflowId))
+        .doOnError(
+            throwable ->
+                log.error("🛑 Error scheduling shipping workflow: {}", throwable.getMessage()))
+        .then();
   }
 
-  public Mono<Void> updateShipmentStatus(UUID id, ShipmentStatus status) {
+  public Mono<Void> updateShipmentStatus(UUID workflowId, ShipmentStatus status) {
 
-    return shippingRepository
-        .getShipment(id)
-        .flatMap(
-            shipment -> {
-              shipment.setShipmentStatus(status);
-              return shippingRepository.saveShipment(shipment);
-            })
-        .doOnSuccess(unused -> log.info("✅ Updated shipment status : {} to {}", id, status))
-        .doOnError(
-            error ->
-                log.error(
-                    "🛑 Error updating shipment status for id {}: {}", id, error.getMessage()));
+    switch (status) {
+      case PENDING -> daprWfClient.raiseEvent(workflowId.toString(), PENDING.name(), null);
+      case SHIPPED -> daprWfClient.raiseEvent(workflowId.toString(), SHIPPED.name(), null);
+      case DELIVERED -> daprWfClient.raiseEvent(workflowId.toString(), DELIVERED.name(), null);
+      default -> Mono.error(new IllegalArgumentException("Unsupported shipment status: " + status));
+    }
+    return Mono.empty();
   }
 
   public Mono<Void> deleteShipment(UUID id) {
